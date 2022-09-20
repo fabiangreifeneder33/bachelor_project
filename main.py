@@ -115,8 +115,7 @@ class BZ:
             self.plot_results_3D(*args)
 
         plt.legend()
-        plt.title("Results after " + str(self.iter) + " iterations of " + self.method_str + " \nError: " + str(
-            self.max_errors[self.iter]))
+        plt.title("Results after " + str(self.iter) + " iterations of " + self.method_str + " \nError: " + str(self.max_errors[self.iter]))
 
     def plot_control_points(self):
         # plot control points
@@ -195,7 +194,7 @@ if __name__ == "__main__":
     cp_numbers = {helix: 19, lemniscate: 10, heart: 20}
 
     # select curve and set the number of control-points n_ and the parameter interval intvl_
-    curve = heart
+    curve = helix
     intvl_ = intervals[curve]
     n_ = cp_numbers[curve]
 
