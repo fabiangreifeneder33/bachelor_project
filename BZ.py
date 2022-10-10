@@ -42,6 +42,8 @@ class BZ:
         self.w, self.lambda_min, self.lambda_max = None, None, None
         self.m, self.w_iter = None, None
 
+        self.l = 0.5
+
     # apply a single Richardson-Iteration where used method depends on argument method
     def richardson_iter(self, method="simple", m=10):
 
@@ -134,12 +136,12 @@ class BZ:
         plt.ylabel("max euclidean error")
         plt.title("Max errors by iterations")
 
-    def is_improving(self):
+    def is_improving(self, tolerance):
         # returns false if there is no more improvement for the max error (tolerance: 5 iterations, eps: 1e-4)
-        if self.iter < 6:
+        if self.iter < tolerance + 1:
             return True
 
-        elif self.max_errors[self.iter - 5] - self.max_errors[self.iter] < 1e-4:
+        elif self.max_errors[self.iter - tolerance] - self.max_errors[self.iter] < 1e-4:
             return False
 
         return True
@@ -185,3 +187,29 @@ class BZ:
 
         # compute iteration result
         self.solutions[self.iter + 1] = self.solutions[self.iter] + self.w_iter * (self.b - self.A.dot(self.solutions[self.iter]))
+
+    # TODO: Herleitung
+    def f(self, x):
+        return 0.5 * np.dot(np.dot(self.A, x), x) - np.dot(self.b, x)
+
+    def df(self, x):
+        return np.dot(self.A, x) - self.b
+
+    # gradient descent
+    def gradient_descent_iter(self):
+        # current iterate
+        x_iter = self.solutions[self.iter]
+
+        # apply gradient descent with parameter self.l
+        self.solutions[self.iter + 1] = self.solutions[self.iter] - self.l * self.df(x_iter)
+
+        self.iter += 1
+
+        # store euclidean errors of current iteration
+        self.update_errors()
+
+        # if there is no improvement for 5 iterations we make lambda bigger
+        if not self.is_improving(5):
+            self.l *= 2
+            print(self.iter)
+

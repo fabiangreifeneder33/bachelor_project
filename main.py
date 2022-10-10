@@ -11,7 +11,7 @@ if __name__ == "__main__":
     cp_numbers = {helix: 19, lemniscate: 10, heart: 20}
 
     # select curve and set the number of control-points n_ and the parameter interval intvl_
-    curve = helix
+    curve = lemniscate
     intvl_ = intervals[curve]
     n_ = cp_numbers[curve]
 
@@ -25,8 +25,8 @@ if __name__ == "__main__":
     bz_repr = BZ(interpolation_points)
 
     # apply Richardson-method to Bézier curve until there is no more improvement to the max-error
-    while bz_repr.is_improving():
-        bz_repr.richardson_iter(method="cyclical")
+    while bz_repr.is_improving(tolerance=10):
+        bz_repr.gradient_descent_iter()
 
     # plot computed Bézier curve
     bz_repr.plot_results(curve, *intvl_)
