@@ -211,5 +211,4 @@ class BZ:
         # if there is no improvement for 5 iterations we make lambda bigger
         if not self.is_improving(5):
             self.l *= 2
-            print(self.iter)
 

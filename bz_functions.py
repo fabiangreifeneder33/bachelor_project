@@ -1,4 +1,4 @@
-from scipy import special
+import scipy.special as special
 import numpy as np
 import math
 
