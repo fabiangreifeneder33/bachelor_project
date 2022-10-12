@@ -87,7 +87,7 @@ class BZ:
         # plot computed Bézier representation
         T = np.linspace(self.intvl[0], self.intvl[1], 100)
         plt_points = np.asarray([self.curve(t) for t in T])
-        plt.plot(plt_points[:, 0], plt_points[:, 1], color='blue', linestyle="dashed", label="Bezier-representation")
+        plt.plot(plt_points[:, 0], plt_points[:, 1], color='red', linestyle="dashed", label="Bezier-representation")
 
         # plot target curve for comparison
         T = np.linspace(t_0, t_n, 100)
@@ -101,7 +101,7 @@ class BZ:
         # plot computed Bézier representation
         T = np.linspace(self.intvl[0], self.intvl[1], 100)
         plt_points = np.asarray([self.curve(t) for t in T])
-        ax.plot3D(plt_points[:, 0], plt_points[:, 1], plt_points[:, 2], color='blue', linestyle="dashed", label="Bezier-representation")
+        ax.plot3D(plt_points[:, 0], plt_points[:, 1], plt_points[:, 2], color='red', linestyle="dashed", label="Bezier-representation")
 
         # plot target curve for comparison
         T = np.linspace(t_0, t_n, 100)
@@ -122,12 +122,12 @@ class BZ:
     def plot_control_points(self):
         # plot control points
         for p in self.solutions[self.iter]:
-            plt.plot(*p, color="red", marker="o")
+            plt.plot(*p, color="blue", marker="o")
 
     def plot_ip_points(self):
         # plot interpolation points
         for p in self.ip_points:
-            plt.plot(*p, color="red", marker="o")
+            plt.plot(*p, color="blue", marker="o")
 
     def plot_errors(self):
         # plot error function (error: max euclidean distance between the ip-points and their BZ-representation results)
