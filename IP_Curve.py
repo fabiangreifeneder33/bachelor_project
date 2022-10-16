@@ -1,17 +1,22 @@
 from matplotlib import pyplot as plt
-from bz_functions import *
+from ip_functions import *
 import math
 from math import pi
 import sys
 
 
-# class BZ for Bézier representation of an interpolating curve
-class BZ:
+# class IP-Curve for Bézier/B-Spline representation of an interpolating curve
+class IP_Curve:
 
-    def __init__(self, points: list):
+    def __init__(self, points: list, method="B-Spline"):
 
-        # degree of Bernstein-polynomials
+        # method (Bezier or B-Spline)
+        self.method = method
+
+        # degree of Bernstein-polynomials, number of B-Splines, degree of B-Splines (has to be odd)
         self.degree = len(points) - 1
+        self.n = len(points)
+        self.b_spline_degree = 3
 
         # dimension of the euclidean space which our curves lie in
         self.dim = len(points[0])
@@ -23,14 +28,19 @@ class BZ:
         # interpolation-points (P_i's in Carnicer-Paper)
         self.ip_points = points
 
-        # parameter interval (t_i's lie here)
+        # parameter interval for knots (t_i's lie here)
         self.intvl = [0, 1]
 
+        # knots for B-Spline representation
+        k = (self.b_spline_degree + 1) // 2
+        self.b_spline_knots = [self.intvl[0]]*k + list(np.linspace(self.intvl[0], self.intvl[1], num=self.n)) + \
+                              [self.intvl[1]]*k
+
         # ignore (for plotting)
-        self.method_str = ""
+        self.richardson_method_str = ""
 
         # derive matrix equation
-        self.A = collocation_matrix(self.degree, *self.intvl)
+        self.A = self.collocation_matrix(self.method)
         self.b = np.asarray(points)
 
         # solutions and errors of each iteration
@@ -69,25 +79,34 @@ class BZ:
         # store euclidean errors of current iteration
         self.update_errors()
 
-    # Bézier curve of current iteration (input: float t, output: curve evaluated at t)
+    # Interpolating curve of current iteration (input: float t, output: curve evaluated at t)
     def curve(self, t):
         control_points = self.solutions[self.iter]
 
         # coordinates of ɣ(t) get stored in list results
         result = []
 
-        # compute ɣ(t) for each coordinate (formula: ɣ(t) = ∑ Q_i * u_i(t), where u_i is the i-th Bernstein-polynomial)
+        # compute ɣ(t) for each coordinate (formula: ɣ(t) = ∑ Q_i * u_i(t), where u_i is the i-th basis-polynomial)
         for i in range(self.dim):
-            result.append(sum(control_points[k, i] * bernstein_poly(k, self.degree, t) for k in range(self.degree+1)))
+
+            if self.method == "Bezier":
+                result.append(sum(control_points[k, i] * bernstein_poly(k, self.degree, t) for k in range(self.degree+1)))
+
+            elif self.method == "B-Spline":
+                spl = sp.BSpline(np.array(self.b_spline_knots), control_points[:, i], k=self.b_spline_degree)
+                result.append(spl(t))
+
+            else:
+                sys.exit("ERROR: NOT IMPLEMENTED CURVE-METHOD")
 
         return result
 
     def plot_results_2D(self, target_curve, t_0, t_n):
 
-        # plot computed Bézier representation
+        # plot computed curve representation
         T = np.linspace(self.intvl[0], self.intvl[1], 100)
         plt_points = np.asarray([self.curve(t) for t in T])
-        plt.plot(plt_points[:, 0], plt_points[:, 1], color='red', linestyle="dashed", label="Bezier-representation")
+        plt.plot(plt_points[:, 0], plt_points[:, 1], color='red', linestyle="dashed", label=f"{self.method}-representation")
 
         # plot target curve for comparison
         T = np.linspace(t_0, t_n, 100)
@@ -98,10 +117,10 @@ class BZ:
 
         ax = plt.axes(projection='3d')
 
-        # plot computed Bézier representation
+        # plot computed curve representation
         T = np.linspace(self.intvl[0], self.intvl[1], 100)
         plt_points = np.asarray([self.curve(t) for t in T])
-        ax.plot3D(plt_points[:, 0], plt_points[:, 1], plt_points[:, 2], color='red', linestyle="dashed", label="Bezier-representation")
+        ax.plot3D(plt_points[:, 0], plt_points[:, 1], plt_points[:, 2], color='red', linestyle="dashed", label=f"{self.method}-representation")
 
         # plot target curve for comparison
         T = np.linspace(t_0, t_n, 100)
@@ -117,7 +136,7 @@ class BZ:
             self.plot_results_3D(*args)
 
         plt.legend()
-        plt.title("Results after " + str(self.iter) + " iterations of " + self.method_str + " \nError: " + str(self.max_errors[self.iter]))
+        plt.title("Results after " + str(self.iter) + " iterations of " + self.richardson_method_str + " \nError: " + str(self.max_errors[self.iter]))
 
     def plot_control_points(self):
         # plot control points
@@ -153,7 +172,7 @@ class BZ:
 
     def simple_richardson(self):
         # method-string for plotting results
-        self.method_str = "Richardson"
+        self.richardson_method_str = "Richardson"
 
         # compute iteration result
         Id = np.identity(self.A.shape[0])
@@ -161,7 +180,7 @@ class BZ:
 
     def modified_richardson(self):
         # method-string for plotting results
-        self.method_str = "modified Richardson"
+        self.richardson_method_str = "modified Richardson"
 
         # if parameter w is not yet computed: w = 2 / (λ_min + λ_max)
         if self.w is None:
@@ -173,7 +192,7 @@ class BZ:
 
     def cyclical_richardson(self):
         # method-string for plotting results
-        self.method_str = "cyclical Richardson"
+        self.richardson_method_str = "cyclical Richardson"
 
         # if eigenvalues not yet computed, compute them
         if self.lambda_min is None:
@@ -211,4 +230,15 @@ class BZ:
         # if there is no improvement for 5 iterations we make lambda bigger
         if not self.is_improving(5):
             self.l *= 2
+
+    def collocation_matrix(self, method):
+
+        if method == "Bezier":
+            return bezier_collocation_matrix(self.n, *self.intvl)
+
+        elif method == "B-Spline":
+            return b_spline_collocation_matrix(self.n, *self.intvl, self.b_spline_degree)
+
+        else:
+            sys.exit("ERROR: NOT IMPLEMENTED CURVE-METHOD")
 

@@ -1,14 +1,14 @@
 from matplotlib import pyplot as plt
-from bz_functions import *
+from ip_functions import *
 from math import pi
-from BZ import BZ
+from IP_Curve import IP_Curve
 
 
 if __name__ == "__main__":
 
     # depending on the curve we use we have to choose different parameter-intervals and numbers of control-points
     intervals = {helix: [0, 6 * pi], lemniscate: [-pi / 2, 3 * pi / 2], heart: [0, 2 * pi]}
-    cp_numbers = {helix: 19, lemniscate: 10, heart: 20}
+    cp_numbers = {helix: 19, lemniscate: 11, heart: 20}
 
     # select curve and set the number of control-points n_ and the parameter interval intvl_
     curve = lemniscate
@@ -21,14 +21,14 @@ if __name__ == "__main__":
     for s in S:
         interpolation_points += [curve(s)]
 
-    # set-up Bézier-representation
-    bz_repr = BZ(interpolation_points)
+    # set-up curve-representation (with "B-Spline" or "Bezier" as method)
+    bz_repr = IP_Curve(interpolation_points, method="Bezier")
 
-    # apply Richardson-method to Bézier curve until there is no more improvement to the max-error
+    # apply Richardson-method to our curve until there is no more improvement to the max-error
     while bz_repr.is_improving(tolerance=10):
         bz_repr.gradient_descent_iter()
 
-    # plot computed Bézier curve
+    # plot computed interpolating curve
     bz_repr.plot_results(curve, *intvl_)
     bz_repr.plot_ip_points()
     plt.show()
