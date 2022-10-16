@@ -1,6 +1,6 @@
 # Bachelor-Thesis Project
 
-The goal of this project is to find interpolating Bézier-curves for some given
+The goal of this project is to find interpolating Bézier/B-Spline-curves for some given
 interpolation points.
 
 To test our program we use the [main.py-script](main.py):
