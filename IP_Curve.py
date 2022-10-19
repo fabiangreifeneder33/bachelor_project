@@ -104,12 +104,12 @@ class IP_Curve:
     def plot_results_2D(self, target_curve, t_0, t_n):
 
         # plot computed curve representation
-        T = np.linspace(self.intvl[0], self.intvl[1], 100)
+        T = np.linspace(self.intvl[0], self.intvl[1], 1000)
         plt_points = np.asarray([self.curve(t) for t in T])
         plt.plot(plt_points[:, 0], plt_points[:, 1], color='red', linestyle="dashed", label=f"{self.method}-representation")
 
         # plot target curve for comparison
-        T = np.linspace(t_0, t_n, 100)
+        T = np.linspace(t_0, t_n, 1000)
         plt_points = np.asarray([target_curve(t) for t in T])
         plt.plot(plt_points[:, 0], plt_points[:, 1], color='black', label="target-curve")
 
@@ -118,22 +118,22 @@ class IP_Curve:
         ax = plt.axes(projection='3d')
 
         # plot computed curve representation
-        T = np.linspace(self.intvl[0], self.intvl[1], 100)
+        T = np.linspace(self.intvl[0], self.intvl[1], 1000)
         plt_points = np.asarray([self.curve(t) for t in T])
         ax.plot3D(plt_points[:, 0], plt_points[:, 1], plt_points[:, 2], color='red', linestyle="dashed", label=f"{self.method}-representation")
 
         # plot target curve for comparison
-        T = np.linspace(t_0, t_n, 100)
+        T = np.linspace(t_0, t_n, 1000)
         plt_points = np.asarray([target_curve(t) for t in T])
         ax.plot3D(plt_points[:, 0], plt_points[:, 1], plt_points[:, 2], color='black', label="target-curve")
 
-    def plot_results(self, *args):
+    def plot_results(self, *interval):
 
         if self.dim == 2:
-            self.plot_results_2D(*args)
+            self.plot_results_2D(*interval)
 
         elif self.dim == 3:
-            self.plot_results_3D(*args)
+            self.plot_results_3D(*interval)
 
         plt.legend()
         plt.title("Results after " + str(self.iter) + " iterations of " + self.richardson_method_str + " \nError: " + str(self.max_errors[self.iter]))
@@ -241,4 +241,5 @@ class IP_Curve:
 
         else:
             sys.exit("ERROR: NOT IMPLEMENTED CURVE-METHOD")
+
 

@@ -45,3 +45,27 @@ def lemniscate(t):
 # Helix as a 3D-example
 def helix(t):
     return [5 * math.cos(t), 5 * math.sin(t), t]
+
+
+def create_ip_points(curve, n: int, equispaced: bool, sigma=0, a=0, b=1):
+    interpolation_points = []
+
+    if equispaced:
+        S = np.linspace(a, b, n)
+    else:
+        S = np.random.uniform(a, b, n-2)
+        S = np.append(S, np.array([a, b]))  # allowed? (without we loose precision at end/start of curve)
+        S = np.sort(S)
+
+    for s in S:
+        interpolation_points += [curve(s)]
+
+    if sigma:
+        noise = np.random.normal(scale=sigma, size=[len(interpolation_points), len(interpolation_points[0])])
+        interpolation_points += noise
+
+    return interpolation_points
+
+
+
+
