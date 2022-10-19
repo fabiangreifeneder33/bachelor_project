@@ -146,7 +146,7 @@ class IP_Curve:
     def plot_ip_points(self):
         # plot interpolation points
         for p in self.ip_points:
-            plt.plot(*p, color="blue", marker="o")
+            plt.plot(*p, color="blue", marker="o", markersize=2)
 
     def plot_errors(self):
         # plot error function (error: max euclidean distance between the ip-points and their BZ-representation results)
